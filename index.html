@@ -573,24 +573,18 @@
             transform: translateY(0);
         }
 
+        /* Simple table for list */
+        table.paper-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .paper-table th, .paper-table td { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left; }
+        .paper-table th { color: #64c8ff; font-weight: 700; }
+        .paper-table a { color: #a78bfa; text-decoration: none; }
+        .paper-table a:hover { text-decoration: underline; }
+
         @media (max-width: 768px) {
-            .menu-panel {
-                width: 100%;
-                right: -100%;
-            }
-            
-            .header h1 {
-                font-size: 2.5rem;
-            }
-            
-            .contact {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .research-grid {
-                grid-template-columns: 1fr;
-            }
+            .menu-panel { width: 100%; right: -100%; }
+            .header h1 { font-size: 2.5rem; }
+            .contact { flex-direction: column; text-align: center; }
+            .research-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -614,6 +608,23 @@
         <div class="container">
             <div class="header">
                 <h1>RESEARCH</h1>
+                
+                <!-- AI Research Helper -->
+                <div style="max-width: 600px; margin: 30px auto 0;">
+                    <div style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 15px; padding: 15px; display: flex; gap: 10px;">
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            placeholder="Search any research topic..." 
+                            style="flex: 1; padding: 12px 20px; border: none; border-radius: 10px; background: rgba(255, 255, 255, 0.9); color: #0a0e27; font-size: 1rem;"
+                            onkeypress="if(event.key === 'Enter') searchTopic()"
+                        >
+                        <button onclick="searchTopic()" style="padding: 12px 25px; background: linear-gradient(135deg, #64c8ff, #a78bfa); border: none; border-radius: 10px; color: white; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                            🔍 Search
+                        </button>
+                    </div>
+                    <p style="font-size: 0.9rem; color: #aaa; margin-top: 10px;">Get AI-powered research assistance and presentation tools</p>
+                </div>
             </div>
 
             <div class="intro scroll-reveal">
@@ -676,6 +687,21 @@
                         <span class="status completed">✓ Read Paper</span>
                     </div>
                 </div>
+
+                <!-- 🔽 Dynamic list from Firestore -->
+                <h3 style="margin-top:30px;">All Uploaded Papers</h3>
+                <table class="paper-table" id="papersTable">
+                    <thead>
+                        <tr>
+                            <th>File Name</th>
+                            <th>Type</th>
+                            <th>Uploaded</th>
+                        </tr>
+                    </thead>
+                    <tbody id="papersTableBody">
+                        <tr><td colspan="3" style="color:#aaa;">No uploads yet.</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -821,21 +847,21 @@
                 <div style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 15px; margin: 20px 0; border: 1px solid rgba(255, 255, 255, 0.1);">
                     <h3 style="color: #64c8ff; margin-bottom: 15px;">📝 How to Submit:</h3>
                     <ol style="text-align: left; color: #aaa; line-height: 2;">
-                        <li>Click the button below to open the submission form</li>
-                        <li>Fill in your details (Name, Email, Paper Title)</li>
-                        <li>Upload your research paper (PDF, PPT, or PPTX)</li>
-                        <li>Submit the form</li>
-                        <li>We'll review and publish your paper within 3-5 days</li>
+                        <li>Click the button below to choose a file</li>
+                        <li>We accept PDF, PPT, and PPTX formats</li>
+                        <li>Upload will save to Firebase and appear on the Research Papers page</li>
                     </ol>
                 </div>
 
-                <button class="upload-btn" onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSceP36bYEh3AMnxWmJ4QY2yqDNkcpyaChy1HQGsrZOu8Ylf6Q/viewform', '_blank')">
-                    📄 Open Submission Form
-                </button>
+                <!-- Keep your original form button if you still want it -->
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">📄 Choose File</button>
 
-                <p style="color: #999; margin-top: 20px; font-size: 0.9rem;">
-                    Your submission will be reviewed before publication. We accept PDF, PPT, and PPTX formats.
-                </p>
+                <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                    <input type="file" id="fileInput" accept=".pdf,.ppt,.pptx" onchange="uploadPaper(event)">
+                    <p id="uploadStatus">Click to select your research paper (PDF, PPT, or PPTX)</p>
+                </div>
+
+                <p style="color: #999; margin-top: 10px; font-size: 0.9rem;">Your submission will be uploaded to Firebase Storage and listed automatically.</p>
             </div>
         </div>
     </div>
@@ -879,6 +905,105 @@
         </div>
     </div>
 
+    <!-- 🔥 Firebase Setup (CDN ESM) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCmS-lFqBLjG2RWz12owEZtdpQ1lpSQ5B0",
+            authDomain: "research-7b6f1.firebaseapp.com",
+            projectId: "research-7b6f1",
+            storageBucket: "research-7b6f1.appspot.com",
+            messagingSenderId: "894993899623",
+            appId: "1:894993899623:web:59e211700e521b42b6f4c2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+        console.log('✅ Firebase connected successfully!');
+
+        function formatDate(ts) {
+            if (!ts) return '-';
+            // ts may be a Firestore Timestamp
+            try {
+                const d = ts.toDate ? ts.toDate() : new Date(ts);
+                return d.toLocaleString();
+            } catch { return '-'; }
+        }
+
+        // 📤 Upload handler (exposed globally)
+        window.uploadPaper = async (event) => {
+            const file = event.target.files && event.target.files[0];
+            const statusEl = document.getElementById('uploadStatus');
+            if (!file) { if (statusEl) statusEl.textContent = 'No file selected.'; return; }
+            if (statusEl) statusEl.textContent = `Uploading ${file.name}...`;
+
+            try {
+                const storageRef = ref(storage, `research_papers/${Date.now()}_${file.name}`);
+                const uploadTask = uploadBytesResumable(storageRef, file);
+
+                uploadTask.on('state_changed', (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    if (statusEl) statusEl.textContent = `Uploading... ${progress.toFixed(0)}%`;
+                });
+
+                await new Promise((resolve, reject) => {
+                    uploadTask.on('state_changed', null, reject, resolve);
+                });
+
+                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+
+                await addDoc(collection(db, 'research_papers'), {
+                    title: file.name,
+                    url: downloadURL,
+                    size: file.size,
+                    type: file.type || (file.name.split('.').pop() || '').toLowerCase(),
+                    uploadedAt: serverTimestamp()
+                });
+
+                if (statusEl) statusEl.textContent = '✅ Uploaded successfully! It will appear in the list shortly.';
+            } catch (err) {
+                console.error(err);
+                if (statusEl) statusEl.textContent = '❌ Upload failed: ' + err.message;
+            }
+        };
+
+        // 📥 Fetch & render list (exposed globally)
+        window.fetchPapers = async () => {
+            const tbody = document.getElementById('papersTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = `<tr><td colspan="3" style="color:#aaa;">Loading...</td></tr>`;
+            try {
+                const q = query(collection(db, 'research_papers'), orderBy('uploadedAt', 'desc'));
+                const snap = await getDocs(q);
+                if (snap.empty) {
+                    tbody.innerHTML = `<tr><td colspan="3" style="color:#aaa;">No uploads yet.</td></tr>`;
+                    return;
+                }
+                const rows = [];
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const name = d.title || '(untitled)';
+                    const type = (d.type || '-').toString().toUpperCase().replace('APPLICATION/', '');
+                    const when = formatDate(d.uploadedAt);
+                    const url = d.url || '#';
+                    rows.push(`<tr>
+                        <td><a href="${url}" target="_blank" rel="noopener">${name}</a></td>
+                        <td>${type}</td>
+                        <td>${when}</td>
+                    </tr>`);
+                });
+                tbody.innerHTML = rows.join('');
+            } catch (e) {
+                console.error(e);
+                tbody.innerHTML = `<tr><td colspan="3" style="color:#f99;">Failed to load papers: ${e.message}</td></tr>`;
+            }
+        };
+    </script>
+
     <script>
         // Create animated particles
         function createParticles() {
@@ -895,6 +1020,63 @@
         }
 
         createParticles();
+
+        function searchTopic() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) {
+                alert('Please enter a research topic!');
+                return;
+            }
+
+            // Show loading and redirect directly to Gamma
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.9);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+            `;
+
+            modal.innerHTML = `
+                <div style="background: linear-gradient(135deg, #1a1f3a, #2a2f4a); padding: 50px; border-radius: 20px; max-width: 500px; width: 90%; border: 1px solid rgba(100, 200, 255, 0.3); text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 20px;">🎨</div>
+                    <h2 style="color: #64c8ff; margin-bottom: 20px;">Generating Your Presentation...</h2>
+                    <p style="color: #aaa; margin-bottom: 30px;">Topic: "<strong style="color: white;">${query}</strong>"</p>
+                    
+                    <div style="width: 100%; height: 4px; background: rgba(100, 200, 255, 0.2); border-radius: 2px; overflow: hidden; margin-bottom: 30px;">
+                        <div style="width: 0%; height: 100%; background: linear-gradient(90deg, #64c8ff, #a78bfa); animation: loadBar 2s forwards;"></div>
+                    </div>
+                    
+                    <p style="color: #999; font-size: 0.9rem;">Opening Gamma.ai in 3 seconds...</p>
+                    <p style="color: #666; font-size: 0.85rem; margin-top: 10px;">You'll need to sign in to Gamma to complete the generation</p>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            // Add loading animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes loadBar {
+                    0% { width: 0%; }
+                    100% { width: 100%; }
+                }
+            `;
+            document.head.appendChild(style);
+
+            // Redirect to Gamma after 3 seconds
+            setTimeout(() => {
+                const encodedQuery = encodeURIComponent(`Create a detailed research presentation about ${query}`);
+                window.open(`https://gamma.app/generate?text=${encodedQuery}`, '_blank');
+                modal.remove();
+            }, 3000);
+        }
 
         let uploadedFile = null;
 
@@ -917,6 +1099,11 @@
             
             // Re-initialize scroll animations for new page
             setTimeout(initScrollAnimations, 100);
+
+            // 🔄 When navigating to research list, refresh papers
+            if (pageId === 'research-list' && window.fetchPapers) {
+                window.fetchPapers();
+            }
         }
 
         function showMenu(menuId) {
@@ -938,25 +1125,6 @@
                 toggleMenu();
             }
             window.scrollTo(0, 0);
-        }
-
-        function handleFileUpload(event) {
-            uploadedFile = event.target.files[0];
-            if (uploadedFile) {
-                document.getElementById('uploadStatus').textContent = `Selected: ${uploadedFile.name}`;
-            }
-        }
-
-        function submitResearch() {
-            if (!uploadedFile) {
-                alert('Please select a file first!');
-                return;
-            }
-            
-            alert(`Your research paper "${uploadedFile.name}" has been successfully submitted! It will be published soon after review.`);
-            uploadedFile = null;
-            document.getElementById('fileInput').value = '';
-            document.getElementById('uploadStatus').textContent = '';
         }
 
         // Scroll reveal animation
@@ -1016,6 +1184,9 @@
                 this.style.transform = '';
             });
         });
+
+        // ✅ Dev assertions
+        console.assert(typeof toggleMenu === 'function', 'toggleMenu should be defined');
     </script>
 </body>
 </html>
