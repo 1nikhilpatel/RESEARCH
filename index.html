@@ -1,1048 +1,968 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Research Papers Platform</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Research Papers Platform</title>
 
-    <style>
-        /* ===============================
-           GLOBAL RESET & BASE STYLES
-           -------------------------------
-           - Remove default margins/padding
-           - Use border-box sizing so padding/borders
-             don't change element width/height math
-        =================================*/
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+  <style>
+    /* =========================================================
+       GLOBAL RESET & BASE STYLES
+       - Keep the exact same visual style you built
+       ========================================================*/
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* Overall page look: dark, minimal, readable typeface */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0e27;       /* deep blue background */
-            min-height: 100vh;         /* full-height canvas */
-            overflow-x: hidden;        /* avoid horizontal scrolls */
-            color: white;              /* default text color */
-        }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0a0e27;
+      min-height: 100vh;
+      overflow-x: hidden;
+      color: white;
+    }
 
-        /* ===============================
-           ANIMATED BACKGROUND LAYER
-           -------------------------------
-           - A subtle moving gradient behind everything
-        =================================*/
-        .bg-animation {
-            position: fixed;
-            inset: 0;                  /* top:0 right:0 bottom:0 left:0 */
-            z-index: -1;               /* sit behind content */
-            background: linear-gradient(45deg, #0a0e27, #1a1f3a, #2a2f4a);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;  /* slow, smooth shift */
-        }
-        @keyframes gradientShift {
-            0%   { background-position: 0% 50%; }
-            50%  { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+    /* Moving gradient background layer (unchanged visually) */
+    .bg-animation {
+      position: fixed; inset: 0; z-index: -1;
+      background: linear-gradient(45deg, #0a0e27, #1a1f3a, #2a2f4a);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
 
-        /* Tiny floating "stars" / particles for ambience */
-        .particle {
-            position: fixed;
-            width: 4px; height: 4px;
-            background: rgba(100, 200, 255, 0.5);
-            border-radius: 50%;
-            pointer-events: none;  /* purely decorative */
-            animation: float linear infinite; /* float upward + spin */
-        }
-        @keyframes float {
-            to { transform: translateY(-100vh) rotate(360deg); }
-        }
+    /* Tiny floating particles/stars (unchanged visuals) */
+    .particle {
+      position: fixed; width: 4px; height: 4px;
+      background: rgba(100, 200, 255, 0.5);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: float linear infinite;
+    }
+    @keyframes float { to { transform: translateY(-100vh) rotate(360deg); } }
 
-        /* ===============================
-           HAMBURGER MENU BUTTON (top-right)
-           -------------------------------
-           - Opens/closes the slide-in menu panel
-        =================================*/
-        .menu-btn {
-            position: fixed;
-            top: 20px; right: 20px;
-            width: 50px; height: 50px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 10px;
-            cursor: pointer;
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            gap: 6px;                 /* spacing between the 3 bars */
-            z-index: 1000;            /* above most things */
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-            transition: all 0.3s;
-        }
-        .menu-btn:hover {
-            transform: scale(1.1) rotate(90deg);
-            background: rgba(100, 200, 255, 0.2);
-        }
-        /* The 3 bars inside the hamburger */
-        .menu-btn span {
-            width: 30px; height: 3px;
-            background: linear-gradient(90deg, #64c8ff, #a78bfa);
-            border-radius: 2px;
-            transition: 0.3s;
-        }
-        /* X animation when active */
-        .menu-btn.active span:nth-child(1) { transform: rotate(45deg) translate(8px, 8px); }
-        .menu-btn.active span:nth-child(2) { opacity: 0; }
-        .menu-btn.active span:nth-child(3) { transform: rotate(-45deg) translate(8px, -8px); }
+    /* Hamburger menu button (unchanged visuals) */
+    .menu-btn {
+      position: fixed; top: 20px; right: 20px;
+      width: 50px; height: 50px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px; cursor: pointer;
+      display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px;
+      z-index: 1000; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s;
+    }
+    .menu-btn:hover { transform: scale(1.1) rotate(90deg); background: rgba(100, 200, 255, 0.2); }
+    .menu-btn span {
+      width: 30px; height: 3px; background: linear-gradient(90deg, #64c8ff, #a78bfa);
+      border-radius: 2px; transition: 0.3s;
+    }
+    .menu-btn.active span:nth-child(1) { transform: rotate(45deg) translate(8px, 8px); }
+    .menu-btn.active span:nth-child(2) { opacity: 0; }
+    .menu-btn.active span:nth-child(3) { transform: rotate(-45deg) translate(8px, -8px); }
 
-        /* ===============================
-           SLIDE-IN MENU PANEL (right side)
-        =================================*/
-        .menu-panel {
-            position: fixed; top: 0; right: -400px; /* hidden off canvas by default */
-            width: 400px; height: 100vh;
-            background: rgba(20, 25, 45, 0.95);
-            backdrop-filter: blur(20px);
-            border-left: 1px solid rgba(255,255,255,0.1);
-            box-shadow: -5px 0 50px rgba(0,0,0,0.5);
-            z-index: 999;
-            transition: right 0.5s cubic-bezier(0.68,-0.55,0.265,1.55); /* springy slide */
-            overflow-y: auto;   /* scroll if contents overflow */
-            padding: 80px 30px 30px; /* top padding leaves room under header */
-        }
-        .menu-panel.active { right: 0; } /* slide in */
+    /* Right drawer menu panel (unchanged visuals) */
+    .menu-panel {
+      position: fixed; top: 0; right: -400px; width: 400px; height: 100vh;
+      background: rgba(20, 25, 45, 0.95); backdrop-filter: blur(20px);
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: -5px 0 50px rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      transition: right 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      overflow-y: auto; padding: 80px 30px 30px;
+    }
+    .menu-panel.active { right: 0; }
+    .menu-item {
+      padding: 20px; margin-bottom: 15px;
+      background: linear-gradient(135deg, rgba(100, 200, 255, 0.1), rgba(167, 139, 250, 0.1));
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: white; border-radius: 15px; cursor: pointer; font-size: 18px; font-weight: 600;
+      transition: all 0.3s; position: relative; overflow: hidden;
+    }
+    .menu-item::before {
+      content: ''; position: absolute; inset: 0; left: -100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+    .menu-item:hover::before { left: 100%; }
+    .menu-item:hover {
+      transform: translateX(-10px) scale(1.05);
+      background: linear-gradient(135deg, rgba(100, 200, 255, 0.2), rgba(167, 139, 250, 0.2));
+      box-shadow: 0 5px 30px rgba(100, 200, 255, 0.4);
+    }
 
-        /* Clickable items inside the menu drawer */
-        .menu-item {
-            padding: 20px; margin-bottom: 15px;
-            background: linear-gradient(135deg, rgba(100,200,255,0.1), rgba(167,139,250,0.1));
-            border: 1px solid rgba(255,255,255,0.1);
-            color: white;
-            border-radius: 15px;
-            cursor: pointer;
-            font-size: 18px; font-weight: 600;
-            transition: all 0.3s;
-            position: relative; overflow: hidden; /* for the shimmer */
-        }
-        /* Light sweep effect on hover */
-        .menu-item::before {
-            content: ''; position: absolute; inset: 0;
-            left: -100%; width: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-        .menu-item:hover::before { left: 100%; }
-        .menu-item:hover {
-            transform: translateX(-10px) scale(1.05);
-            background: linear-gradient(135deg, rgba(100,200,255,0.2), rgba(167,139,250,0.2));
-            box-shadow: 0 5px 30px rgba(100,200,255,0.4);
-        }
+    /* Layout helpers */
+    .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+    .page { display: none; animation: pageIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+    .page.active { display: block; }
+    @keyframes pageIn {
+      from { opacity: 0; transform: translateY(50px) rotateX(10deg); }
+      to   { opacity: 1; transform: translateY(0) rotateX(0); }
+    }
 
-        /* ===============================
-           LAYOUT HELPERS
-        =================================*/
-        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+    /* Home header + animated title (unchanged visuals) */
+    .header { text-align: center; color: white; margin-bottom: 50px; opacity: 0; animation: fadeInUp 1s forwards; }
+    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+    .header h1 {
+      font-size: 5rem; margin-bottom: 20px;
+      background: linear-gradient(45deg, #64c8ff, #a78bfa, #64c8ff);
+      background-size: 200% 200%;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      animation: gradientText 3s ease infinite;
+      text-shadow: 0 0 30px rgba(100, 200, 255, 0.5);
+      transform: translateY(-20px);
+    }
+    @keyframes gradientText {
+      0%, 100% { background-position: 0% 50%; }
+      50%      { background-position: 100% 50%; }
+    }
 
-        /* "Page" sections for SPA (single page app) feel */
-        .page { display: none; animation: pageIn 0.8s cubic-bezier(0.68,-0.55,0.265,1.55); }
-        .page.active { display: block; }
-        @keyframes pageIn {
-            from { opacity: 0; transform: translateY(50px) rotateX(10deg); }
-            to   { opacity: 1; transform: translateY(0) rotateX(0); }
-        }
+    /* Intro card (unchanged) */
+    .intro {
+      background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px);
+      padding: 40px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      margin-bottom: 50px; font-size: 1.2rem; line-height: 1.8;
+      opacity: 0; animation: fadeInUp 1s 0.2s forwards; transform: translateY(20px);
+      transition: transform 0.3s;
+    }
+    .intro:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 12px 40px rgba(100, 200, 255, 0.3); }
 
-        /* ===============================
-           HOME: HEADER & INTRO
-        =================================*/
-        .header {
-            text-align: center; color: white; margin-bottom: 50px;
-            opacity: 0; animation: fadeInUp 1s forwards;
-        }
-        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+    /* Grid of research cards (unchanged) */
+    .research-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px; margin-bottom: 50px;
+    }
+    .research-card {
+      background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
+      padding: 30px; cursor: pointer; position: relative; overflow: hidden;
+      opacity: 0; animation: cardIn 0.6s forwards;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes cardIn { to { opacity: 1; transform: translateY(0); } }
+    .research-card:nth-child(1) { animation-delay: 0.3s; transform: translateY(30px); }
+    .research-card:nth-child(2) { animation-delay: 0.4s; transform: translateY(30px); }
+    .research-card:nth-child(3) { animation-delay: 0.5s; transform: translateY(30px); }
+    .research-card:nth-child(4) { animation-delay: 0.6s; transform: translateY(30px); }
+    .research-card:nth-child(5) { animation-delay: 0.7s; transform: translateY(30px); }
+    .research-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(45deg, rgba(100, 200, 255, 0.1), rgba(167, 139, 250, 0.1));
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .research-card:hover::before { opacity: 1; }
+    .research-card:hover {
+      transform: translateY(-15px) scale(1.03) rotateY(5deg);
+      box-shadow: 0 20px 60px rgba(100, 200, 255, 0.4);
+      border-color: rgba(100, 200, 255, 0.5);
+    }
+    .research-card h3 { color: #64c8ff; margin-bottom: 15px; font-size: 1.5rem; position: relative; z-index: 1; }
+    .research-card p  { position: relative; z-index: 1; }
 
-        /* Big animated gradient title text: "RESEARCH" */
-        .header h1 {
-            font-size: 5rem; margin-bottom: 20px;
-            background: linear-gradient(45deg, #64c8ff, #a78bfa, #64c8ff);
-            background-size: 200% 200%;
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: gradientText 3s ease infinite;
-            text-shadow: 0 0 30px rgba(100,200,255,0.5);
-            transform: translateY(-20px);
-        }
-        @keyframes gradientText {
-            0%, 100% { background-position: 0% 50%; }
-            50%      { background-position: 100% 50%; }
-        }
+    /* Status chips (unchanged) */
+    .status { display: inline-block; padding: 8px 20px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; margin-top: 15px; position: relative; z-index: 1; }
+    .completed { background: linear-gradient(135deg, #10b981, #059669); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); }
+    .processing { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; animation: pulse 2s infinite; }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4); }
+      50%      { box-shadow: 0 4px 30px rgba(245, 158, 11, 0.8); }
+    }
 
-        /* Intro section: glassy card with copy */
-        .intro {
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(10px);
-            padding: 40px; border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-            margin-bottom: 50px;
-            font-size: 1.2rem; line-height: 1.8;
-            opacity: 0; animation: fadeInUp 1s 0.2s forwards;
-            transform: translateY(20px);
-            transition: transform 0.3s;
-        }
-        .intro:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 12px 40px rgba(100,200,255,0.3); }
+    /* Contact card (unchanged visuals) */
+    .contact {
+      background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 40px; border-radius: 20px; display: flex; align-items: center; gap: 40px;
+      opacity: 0; animation: fadeInUp 1s 0.8s forwards; transform: translateY(20px); transition: all 0.3s;
+    }
+    .contact:hover { transform: translateY(-5px); box-shadow: 0 12px 40px rgba(100, 200, 255, 0.3); }
+    .contact img {
+      width: 200px; height: 200px; border-radius: 50%; object-fit: cover;
+      border: 3px solid rgba(100, 200, 255, 0.5); box-shadow: 0 0 30px rgba(100, 200, 255, 0.5);
+      transition: all 0.3s;
+    }
+    .contact img:hover { transform: scale(1.1) rotate(5deg); box-shadow: 0 0 50px rgba(100, 200, 255, 0.8); }
+    .contact-info h2 { color: #64c8ff; margin-bottom: 15px; font-size: 2rem; }
+    .contact-info p  { font-size: 1.1rem; line-height: 1.8; }
 
-        /* ===============================
-           RESEARCH CARDS GRID
-           - Each card is a topic
-        =================================*/
-        .research-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px; margin-bottom: 50px;
-        }
-        .research-card {
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 30px; cursor: pointer; position: relative; overflow: hidden;
-            opacity: 0; animation: cardIn 0.6s forwards;
-            transition: all 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
-        }
-        @keyframes cardIn { to { opacity: 1; transform: translateY(0); } }
+    /* Paper content page styles (unchanged) */
+    .paper-content {
+      background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1); padding: 50px; border-radius: 20px; line-height: 1.8;
+    }
+    .paper-content h2 { color: #64c8ff; margin: 30px 0 15px; font-size: 2rem; }
+    .paper-content h3 { color: #a78bfa; margin: 25px 0 15px; font-size: 1.5rem; }
+    .paper-content p  { margin-bottom: 20px; text-align: justify; }
 
-        /* Staggered reveal delays for first few cards */
-        .research-card:nth-child(1) { animation-delay: 0.3s; transform: translateY(30px); }
-        .research-card:nth-child(2) { animation-delay: 0.4s; transform: translateY(30px); }
-        .research-card:nth-child(3) { animation-delay: 0.5s; transform: translateY(30px); }
-        .research-card:nth-child(4) { animation-delay: 0.6s; transform: translateY(30px); }
-        .research-card:nth-child(5) { animation-delay: 0.7s; transform: translateY(30px); }
+    .pdf-btn {
+      display: inline-block; padding: 15px 40px; background: linear-gradient(135deg, #64c8ff, #a78bfa);
+      color: white; border-radius: 10px; text-decoration: none; font-weight: 600; margin-bottom: 30px;
+      transition: all 0.3s; box-shadow: 0 4px 15px rgba(100, 200, 255, 0.4);
+    }
+    .pdf-btn:hover { transform: scale(1.1) translateY(-3px); box-shadow: 0 8px 30px rgba(100, 200, 255, 0.6); }
 
-        /* Soft gradient overlay on hover */
-        .research-card::before {
-            content: ''; position: absolute; inset: 0;
-            background: linear-gradient(45deg, rgba(100,200,255,0.1), rgba(167,139,250,0.1));
-            opacity: 0; transition: opacity 0.3s;
-        }
-        .research-card:hover::before { opacity: 1; }
-        .research-card:hover {
-            transform: translateY(-15px) scale(1.03) rotateY(5deg);
-            box-shadow: 0 20px 60px rgba(100,200,255,0.4);
-            border-color: rgba(100,200,255,0.5);
-        }
-        .research-card h3 { color: #64c8ff; margin-bottom: 15px; font-size: 1.5rem; position: relative; z-index: 1; }
-        .research-card p  { position: relative; z-index: 1; }
+    .sources {
+      background: rgba(255, 255, 255, 0.03); padding: 30px; border-radius: 15px; margin-top: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .sources h3 { color: #64c8ff; margin-bottom: 20px; }
+    .sources a {
+      display: block; color: #a78bfa; text-decoration: none; margin-bottom: 10px;
+      padding: 10px; background: rgba(255, 255, 255, 0.05); border-radius: 8px; transition: all 0.3s;
+    }
+    .sources a:hover { background: rgba(100, 200, 255, 0.2); transform: translateX(10px); }
 
-        /* Small status chips */
-        .status {
-            display: inline-block; padding: 8px 20px; border-radius: 20px;
-            font-size: 0.9rem; font-weight: 600; margin-top: 15px; position: relative; z-index: 1;
-        }
-        .completed { background: linear-gradient(135deg, #10b981, #059669); color: white; box-shadow: 0 4px 15px rgba(16,185,129,0.4); }
-        .processing { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; animation: pulse 2s infinite; }
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 4px 15px rgba(245,158,11,0.4); }
-            50%      { box-shadow: 0 4px 30px rgba(245,158,11,0.8); }
-        }
+    /* Upload section (unchanged visuals) */
+    .upload-section {
+      background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 50px; border-radius: 20px; text-align: center;
+    }
+    .upload-section h2 { color: #64c8ff; margin-bottom: 30px; font-size: 2.5rem; }
 
-        /* ===============================
-           CONTACT CARD
-        =================================*/
-        .contact {
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 40px; border-radius: 20px;
-            display: flex; align-items: center; gap: 40px;
-            opacity: 0; animation: fadeInUp 1s 0.8s forwards;
-            transform: translateY(20px); transition: all 0.3s;
-        }
-        .contact:hover { transform: translateY(-5px); box-shadow: 0 12px 40px rgba(100,200,255,0.3); }
-        .contact img {
-            width: 200px; height: 200px; border-radius: 50%; object-fit: cover;
-            border: 3px solid rgba(100,200,255,0.5);
-            box-shadow: 0 0 30px rgba(100,200,255,0.5);
-            transition: all 0.3s;
-        }
-        .contact img:hover { transform: scale(1.1) rotate(5deg); box-shadow: 0 0 50px rgba(100,200,255,0.8); }
-        .contact-info h2 { color: #64c8ff; margin-bottom: 15px; font-size: 2rem; }
-        .contact-info p  { font-size: 1.1rem; line-height: 1.8; }
+    .upload-area {
+      border: 3px dashed rgba(100, 200, 255, 0.5); border-radius: 15px;
+      padding: 60px 40px; margin: 30px 0; cursor: pointer; transition: all 0.3s;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .upload-area:hover { background: rgba(100, 200, 255, 0.1); border-color: #64c8ff; transform: scale(1.02); }
+    .upload-area input { display: none; }
 
-        /* ===============================
-           PAPER CONTENT PAGE TYPOGRAPHY
-        =================================*/
-        .paper-content {
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 50px; border-radius: 20px; line-height: 1.8;
-        }
-        .paper-content h2 { color: #64c8ff; margin: 30px 0 15px; font-size: 2rem; }
-        .paper-content h3 { color: #a78bfa; margin: 25px 0 15px; font-size: 1.5rem; }
-        .paper-content p  { margin-bottom: 20px; text-align: justify; }
+    .upload-btn {
+      padding: 15px 50px; background: linear-gradient(135deg, #64c8ff, #a78bfa);
+      color: white; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600;
+      cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px rgba(100, 200, 255, 0.4);
+    }
+    .upload-btn:hover { transform: scale(1.1) translateY(-3px); box-shadow: 0 8px 30px rgba(100, 200, 255, 0.6); }
 
-        /* Nice primary button style for "Download PDF" */
-        .pdf-btn {
-            display: inline-block; padding: 15px 40px;
-            background: linear-gradient(135deg, #64c8ff, #a78bfa);
-            color: white; border-radius: 10px; text-decoration: none; font-weight: 600;
-            margin-bottom: 30px; transition: all 0.3s; box-shadow: 0 4px 15px rgba(100,200,255,0.4);
-        }
-        .pdf-btn:hover { transform: scale(1.1) translateY(-3px); box-shadow: 0 8px 30px rgba(100,200,255,0.6); }
+    .back-btn {
+      display: inline-block; padding: 12px 30px; background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); color: white; border-radius: 10px;
+      text-decoration: none; font-weight: 600; margin-bottom: 30px; cursor: pointer; font-size: 1rem;
+      transition: all 0.3s;
+    }
+    .back-btn:hover { background: rgba(100, 200, 255, 0.2); transform: translateX(-5px); }
 
-        /* Sources list styling */
-        .sources {
-            background: rgba(255,255,255,0.03);
-            padding: 30px; border-radius: 15px; margin-top: 40px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .sources h3 { color: #64c8ff; margin-bottom: 20px; }
-        .sources a {
-            display: block; color: #a78bfa; text-decoration: none; margin-bottom: 10px;
-            padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; transition: all 0.3s;
-        }
-        .sources a:hover { background: rgba(100,200,255,0.2); transform: translateX(10px); }
+    .links-list {
+      background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1); padding: 50px; border-radius: 20px;
+    }
+    .links-list h2 { color: #64c8ff; margin-bottom: 30px; font-size: 2.5rem; }
+    .link-item {
+      background: rgba(255, 255, 255, 0.05); padding: 25px; border-radius: 15px; margin-bottom: 20px;
+      transition: all 0.3s; border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .link-item:hover {
+      transform: translateX(15px) scale(1.02);
+      box-shadow: 0 5px 30px rgba(100, 200, 255, 0.3);
+      background: rgba(100, 200, 255, 0.1);
+    }
+    .link-item h3 { color: #a78bfa; margin-bottom: 15px; cursor: pointer; }
 
-        /* ===============================
-           "ADD YOUR OWN" (UPLOAD) PAGE
-        =================================*/
-        .upload-section {
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 50px; border-radius: 20px; text-align: center;
-        }
-        .upload-section h2 { color: #64c8ff; margin-bottom: 30px; font-size: 2.5rem; }
+    /* Scroll reveal (unchanged) */
+    .scroll-reveal { opacity: 0; transform: translateY(50px); transition: all 0.8s ease; }
+    .scroll-reveal.active { opacity: 1; transform: translateY(0); }
 
-        /* Drag/click upload area */
-        .upload-area {
-            border: 3px dashed rgba(100,200,255,0.5);
-            border-radius: 15px; padding: 60px 40px; margin: 30px 0;
-            cursor: pointer; transition: all 0.3s; background: rgba(255,255,255,0.02);
-        }
-        .upload-area:hover { background: rgba(100,200,255,0.1); border-color: #64c8ff; transform: scale(1.02); }
-        .upload-area input { display: none; } /* hide the real file input */
+    /* Table for list of papers (unchanged) */
+    table.paper-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    .paper-table th, .paper-table td {
+      padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left;
+    }
+    .paper-table th { color: #64c8ff; font-weight: 700; }
+    .paper-table a { color: #a78bfa; text-decoration: none; }
+    .paper-table a:hover { text-decoration: underline; }
 
-        /* Primary filled action button used in multiple places */
-        .upload-btn {
-            padding: 15px 50px; background: linear-gradient(135deg, #64c8ff, #a78bfa);
-            color: white; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600;
-            cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px rgba(100,200,255,0.4);
-        }
-        .upload-btn:hover { transform: scale(1.1) translateY(-3px); box-shadow: 0 8px 30px rgba(100,200,255,0.6); }
+    /* Upload progress bar (NEW UI) */
+    .progress {
+      width: 100%; height: 10px; border-radius: 999px; background: rgba(255,255,255,0.1);
+      overflow: hidden; margin: 12px 0 6px; display: none;
+    }
+    .progress-bar {
+      width: 0%; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #64c8ff, #a78bfa);
+      transition: width 0.2s linear;
+    }
+    .progress-meta { font-size: 0.9rem; color: #aaa; display: none; }
 
-        /* Back button used at top of subpages */
-        .back-btn {
-            display: inline-block; padding: 12px 30px;
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 10px;
-            text-decoration: none; font-weight: 600; margin-bottom: 30px; cursor: pointer; font-size: 1rem;
-            transition: all 0.3s;
-        }
-        .back-btn:hover { background: rgba(100,200,255,0.2); transform: translateX(-5px); }
-
-        /* ===============================
-           LINKS PAGE
-        =================================*/
-        .links-list {
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 50px; border-radius: 20px;
-        }
-        .links-list h2 { color: #64c8ff; margin-bottom: 30px; font-size: 2.5rem; }
-        .link-item {
-            background: rgba(255,255,255,0.05); padding: 25px; border-radius: 15px; margin-bottom: 20px;
-            transition: all 0.3s; border: 1px solid rgba(255,255,255,0.1);
-        }
-        .link-item:hover {
-            transform: translateX(15px) scale(1.02);
-            box-shadow: 0 5px 30px rgba(100,200,255,0.3);
-            background: rgba(100,200,255,0.1);
-        }
-        .link-item h3 { color: #a78bfa; margin-bottom: 15px; cursor: pointer; }
-
-        /* ===============================
-           SCROLL REVEAL (fade-up on scroll)
-        =================================*/
-        .scroll-reveal { opacity: 0; transform: translateY(50px); transition: all 0.8s ease; }
-        .scroll-reveal.active { opacity: 1; transform: translateY(0); }
-
-        /* ===============================
-           SIMPLE TABLE (for papers list)
-        =================================*/
-        table.paper-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .paper-table th, .paper-table td {
-            padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left;
-        }
-        .paper-table th { color: #64c8ff; font-weight: 700; }
-        .paper-table a { color: #a78bfa; text-decoration: none; }
-        .paper-table a:hover { text-decoration: underline; }
-
-        /* Responsive tweaks */
-        @media (max-width: 768px) {
-            .menu-panel { width: 100%; right: -100%; } /* full-width drawer on mobile */
-            .header h1 { font-size: 2.5rem; }
-            .contact { flex-direction: column; text-align: center; }
-            .research-grid { grid-template-columns: 1fr; }
-        }
-    </style>
+    /* Mobile tweaks (unchanged) */
+    @media (max-width: 768px) {
+      .menu-panel { width: 100%; right: -100%; }
+      .header h1 { font-size: 2.5rem; }
+      .contact { flex-direction: column; text-align: center; }
+      .research-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-    <!-- Decorative moving gradient background -->
-    <div class="bg-animation"></div>
+  <!-- Decorative animated gradient background -->
+  <div class="bg-animation"></div>
 
-    <!-- Top-right hamburger button that toggles the slide-in menu -->
-    <div class="menu-btn" onclick="toggleMenu()">
-        <span></span><span></span><span></span>
-    </div>
+  <!-- Top-right hamburger menu button -->
+  <div class="menu-btn" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
 
-    <!-- Right slide-in menu with 3 navigation items -->
-    <div class="menu-panel">
-        <div class="menu-item" onclick="showMenu('research-list')">Research Papers</div>
-        <div class="menu-item" onclick="showMenu('add-own')">Add Your Own</div>
-        <div class="menu-item" onclick="showMenu('links')">Links</div>
-    </div>
+  <!-- Slide-in right menu -->
+  <div class="menu-panel">
+    <div class="menu-item" onclick="showMenu('research-list')">Research Papers</div>
+    <div class="menu-item" onclick="showMenu('add-own')">Add Your Own</div>
+    <div class="menu-item" onclick="showMenu('links')">Links</div>
+  </div>
 
-    <!-- ===============================
-         PAGE: HOME (default visible)
-    ==================================-->
-    <div id="home" class="page active">
-        <div class="container">
-            <div class="header">
-                <h1>RESEARCH</h1>
+  <!-- HOME PAGE (default visible) -->
+  <div id="home" class="page active">
+    <div class="container">
+      <div class="header">
+        <h1>RESEARCH</h1>
 
-                <!-- ===============================
-                     AI Research Helper (Search Bar)
-                     - User types topic; you open Gamma.ai
-                ==================================-->
-                <div style="max-width: 600px; margin: 30px auto 0;">
-                    <div style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 15px; padding: 15px; display: flex; gap: 10px;">
-                        <input
-                            type="text"
-                            id="searchInput"
-                            placeholder="Search any research topic..."
-                            style="flex: 1; padding: 12px 20px; border: none; border-radius: 10px; background: rgba(255, 255, 255, 0.9); color: #0a0e27; font-size: 1rem;"
-                            onkeypress="if(event.key === 'Enter') searchTopic()"  <!-- Hit Enter to trigger -->
-                        />
-                        <button
-                            onclick="searchTopic()"
-                            style="padding: 12px 25px; background: linear-gradient(135deg, #64c8ff, #a78bfa); border: none; border-radius: 10px; color: white; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                            🔍 Search
-                        </button>
-                    </div>
-                    <p style="font-size: 0.9rem; color: #aaa; margin-top: 10px;">Get AI-powered research assistance and presentation tools</p>
-                </div>
-            </div>
-
-            <!-- Brief intro about the site -->
-            <div class="intro scroll-reveal">
-                <p>This website is created for posting research papers online. Here, everyone can write and share their research papers on different topics. Our goal is to make knowledge accessible to all and promote research in various fields. Join us in building a collaborative platform for researchers and scholars worldwide.</p>
-            </div>
-
-            <!-- Featured topics grid -->
-            <div class="research-grid">
-                <div class="research-card" onclick="showPaper('whistleblower')">
-                    <h3>Whistleblowing in Corporate Governance</h3>
-                    <p>A comprehensive study focusing on corporate transparency and accountability.</p>
-                    <span class="status completed">✓ Completed</span>
-                </div>
-
-                <div class="research-card">
-                    <h3>Artificial Intelligence in Healthcare</h3>
-                    <p>Research on AI's role in the healthcare industry and future possibilities.</p>
-                    <span class="status processing">⟳ Processing</span>
-                </div>
-
-                <div class="research-card">
-                    <h3>Sustainable Energy Solutions</h3>
-                    <p>Study on renewable energy sources and sustainable development.</p>
-                    <span class="status processing">⟳ Processing</span>
-                </div>
-
-                <div class="research-card">
-                    <h3>Blockchain Technology & Finance</h3>
-                    <p>Impact of blockchain on the financial sector and future applications.</p>
-                    <span class="status processing">⟳ Processing</span>
-                </div>
-
-                <div class="research-card">
-                    <h3>Climate Change & Agriculture</h3>
-                    <p>Effects of climate change on agriculture and adaptation strategies.</p>
-                    <span class="status processing">⟳ Processing</span>
-                </div>
-            </div>
-
-            <!-- Contact/Author card -->
-            <div class="contact scroll-reveal">
-                <!-- NOTE: Ensure NIK.jpg exists in the same folder -->
-                <img src="NIK.jpg" alt="Nikhil Patel" />
-                <div class="contact-info">
-                    <h2>Nikhil Patel</h2>
-                    <p><strong>Student</strong></p>
-                    <p>Maharaja Agrasen Institute of Technology (MAIT)</p>
-                    <p>Passionate about research and innovation. Through this platform, I aim to share my research work and motivate others to contribute to the world of knowledge and discovery.</p>
-                </div>
-            </div>
+        <!-- Search bar that opens Gamma.ai with topic (fixed, popup-safe) -->
+        <div style="max-width: 600px; margin: 30px auto 0;">
+          <div style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 15px; padding: 15px; display: flex; gap: 10px;">
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search any research topic..."
+              style="flex: 1; padding: 12px 20px; border: none; border-radius: 10px; background: rgba(255, 255, 255, 0.9); color: #0a0e27; font-size: 1rem;"
+              onkeypress="if(event.key === 'Enter') searchTopic()"
+            />
+            <button onclick="searchTopic()" class="upload-btn" style="padding: 12px 25px;">
+              🔍 Search
+            </button>
+          </div>
+          <p style="font-size: 0.9rem; color: #aaa; margin-top: 10px;">Get AI-powered research assistance and presentation tools</p>
         </div>
-    </div>
+      </div>
 
-    <!-- ===============================
-         PAGE: RESEARCH LIST
-         - Shows Firestore uploads in a table
-    ==================================-->
-    <div id="research-list" class="page">
-        <div class="container">
-            <button class="back-btn" onclick="showPage('home')">← Back to Home</button>
-            <div class="paper-content">
-                <h2>Published Research Papers</h2>
+      <!-- Intro card -->
+      <div class="intro scroll-reveal">
+        <p>This website is created for posting research papers online. Here, everyone can write and share their research papers on different topics. Our goal is to make knowledge accessible to all and promote research in various fields. Join us in building a collaborative platform for researchers and scholars worldwide.</p>
+      </div>
 
-                <!-- Shortcut card to the whistleblower paper -->
-                <div class="research-grid">
-                    <div class="research-card" onclick="showPaper('whistleblower')">
-                        <h3>Whistleblowing in Corporate Governance</h3>
-                        <span class="status completed">✓ Read Paper</span>
-                    </div>
-                </div>
-
-                <!-- Dynamic list from Firebase Firestore -->
-                <h3 style="margin-top:30px;">All Uploaded Papers</h3>
-                <table class="paper-table" id="papersTable">
-                    <thead>
-                        <tr>
-                            <th>File Name</th>
-                            <th>Type</th>
-                            <th>Uploaded</th>
-                        </tr>
-                    </thead>
-                    <tbody id="papersTableBody">
-                        <tr><td colspan="3" style="color:#aaa;">No uploads yet.</td></tr>
-                    </tbody>
-                </table>
-            </div>
+      <!-- Featured topics grid -->
+      <div class="research-grid">
+        <div class="research-card" onclick="showPaper('whistleblower')">
+          <h3>Whistleblowing in Corporate Governance</h3>
+          <p>A comprehensive study focusing on corporate transparency and accountability.</p>
+          <span class="status completed">✓ Completed</span>
         </div>
-    </div>
 
-    <!-- ===============================
-         PAGE: WHISTLEBLOWER PAPER
-         - Long-form content page with sources
-    ==================================-->
-    <div id="whistleblower-paper" class="page">
-        <div class="container">
-            <button class="back-btn" onclick="showPage('home')">← Back to Home</button>
-            <div class="paper-content">
-                <!-- Placeholder: implement real PDF generation later -->
-                <a href="#" class="pdf-btn" onclick="alert('PDF download feature coming soon!'); return false;">📄 Download PDF</a>
-
-                <h2>Whistleblowing: The Moral, Legal, and Human Challenge</h2>
-                <p style="font-style: italic; color: #aaa;">A Guide to Speaking Truth to Power (and the Risks Involved)</p>
-
-                <!-- (Content unchanged; formatted and readable) -->
-                <h3>Simply Put...</h3>
-                <p>Whistleblowing is when an insider (usually an employee) steps up to expose serious wrongdoing—like fraud, illegal activity, or major mismanagement—to the public or the right authorities.</p>
-                <p><strong>The Core Goal:</strong> It's all about making sure organizations are held accountable, corruption is exposed, and companies run ethically.</p>
-                <p><strong>In India:</strong> The law covers both the Government sector (via the WBP Act, 2014) and the Corporate world (via the Companies Act, 2013).</p>
-
-                <h3>What Exactly is Whistleblowing?</h3>
-                <h3>Element 1: It Must Serve the Public Good</h3>
-                <p><strong>Saving People from Harm:</strong> Our top moral duty is to protect the public, customers, and the environment from real, predictable, and serious harm.</p>
-                <p><strong>Putting the Truth Out There:</strong> We have an obligation to reveal corruption and major ethical failures to ensure everyone is accountable and transparent.</p>
-
-                <h3>Element 2: The Loyalty Tug-of-War</h3>
-                <p><strong>Loyalty to Your Boss:</strong> We owe fidelity to our employer—the team, confidentiality, and the mission. This is our job.</p>
-                <p><strong>Loyalty to the Public:</strong> But sometimes, the duty to the public and society's safety must come first when the company is doing something wrong.</p>
-
-                <h3>Element 3: It Takes Real Moral Courage</h3>
-                <p style="font-style: italic; background: rgba(100, 200, 255, 0.1); padding: 20px; border-left: 4px solid #64c8ff; border-radius: 10px;">"It's about sticking to your personal values and principles, even when it means facing huge professional and personal risks." — The Human Element</p>
-
-                <h3>The Deepest Conflict at the Heart of It</h3>
-                <p>At its core, whistleblowing is a clash between two huge things: Your loyalty to the place you work vs. Your moral duty to public safety and truth.</p>
-
-                <h3>Legal Corner: WBP Act, 2014 (For Government Employees)</h3>
-                <p><strong>Who it Covers:</strong> Mostly deals with exposing corruption or power abuse by Public Servants.</p>
-                <p><strong>Where to File:</strong> You have to report to a specific, authorized body, like the Central Vigilance Commission (CVC).</p>
-                <p><strong>Identity Required:</strong> You can't report anonymously. The law requires you to tell the CVC who you are.</p>
-                <p><strong>The Problem with Protection:</strong> The CVC is supposed to keep your name secret, but the very real fear of leaks is what stops most people.</p>
-
-                <h3>Legal Corner: Companies Act, 2013 (For the Corporate World)</h3>
-                <p><strong>Who Needs It:</strong> It's required for all listed companies (and some others).</p>
-                <p><strong>What's Required:</strong> Companies must set up a formal, clear "Vigil Mechanism"—basically, a whistleblower policy.</p>
-                <p><strong>Direct Access:</strong> This mechanism needs to give staff direct, easy access to the Chairperson of the Audit Committee for serious reports.</p>
-                <p><strong>The Goal:</strong> It's designed to help prevent fraud and, critically, give safeguards against being victimized or fired for speaking up.</p>
-
-                <h3>The Motive: Why Do People Blow the Whistle?</h3>
-                <p><strong>The Pure Ethical Drive:</strong> They're driven by deep values—to stop harm and stand for justice, no matter what the cost is (True Intent).</p>
-                <p><strong>The Less Pure Motives:</strong> This can be complicated by personal anger, wanting revenge, or the lure of a big financial reward (Not always Bad, but Complex).</p>
-
-                <h3>The Ultimate Test: Is it Justified?</h3>
-                <p><strong>How We Weigh It Up:</strong> The action must come from a genuine, higher need to protect the public, especially after trying to fix the issue inside the company first (or if it's too dangerous).</p>
-                <p>It's the ultimate ethical showdown: Justice, Safety, and Truth versus Your Loyalty, Your Job, and Your Colleagues.</p>
-
-                <h3>How We Report It: The Reporting Channels</h3>
-                <p><strong>The Internal Path:</strong> You report it inside your organization (e.g., to the Audit Committee or the company hotline). This lets the company fix its own problems.</p>
-                <p><strong>Going Outside:</strong> You report it outside to a regulator (like the CVC, or the police) or the media. This is for when internal channels are useless or the threat is huge.</p>
-
-                <h3>What We Report: The Subject Matter</h3>
-                <p><strong>Money & Fraud Issues:</strong> Things like lying about the books, insider trading, tax evasion, or executives misusing company money.</p>
-                <p><strong>Health & Safety Threats:</strong> Exposing things like pollution, products that aren't safe, or work environments that put employees or the public in danger.</p>
-
-                <h3>The Responsible Way to Blow the Whistle</h3>
-                <p><strong>Start Inside:</strong> Always try to use the company's formal channels first (the Audit Committee, the hotline, etc.).</p>
-                <p><strong>Give Them a Chance:</strong> Give management a fair amount of time to look into it and fix the problem—as long as it's safe for you.</p>
-                <p><strong>Get Your Facts Straight:</strong> Collect solid, provable evidence that confirms the wrongdoing (but don't break any laws getting it!).</p>
-                <p><strong>Go Outside Last:</strong> Only go to the CVC, the police, or the media if the internal team fails, or if the danger is immediate and life-threatening.</p>
-
-                <h3>The Character Traits That Define the Act</h3>
-                <p><strong>Integrity:</strong> Sticking to your own moral compass and putting the truth ahead of your own personal safety.</p>
-                <p><strong>Responsibility:</strong> Accepting that it's your duty to call out and fix a serious wrong.</p>
-                <p><strong>Courage:</strong> The gut-wrenching willingness to face negative fallout at work and in your life.</p>
-
-                <h3>How Companies Can Stop External Whistleblowing</h3>
-                <p><strong>Build a Safe Space:</strong> Create a culture where staff trust they won't be fired or punished (non-victimisation) for speaking up.</p>
-                <p><strong>Make the Hotline Work:</strong> Set up and promote a clear, easy-to-use Vigil Mechanism that reports directly to the Audit Committee.</p>
-                <p><strong>Talk Early & Often:</strong> Encourage staff to flag small concerns quickly, before they turn into massive legal messes.</p>
-                <p><strong>Investigate FAST:</strong> Every single internal complaint must be looked into immediately, completely, and openly.</p>
-
-                <h3>Case Study 1: Satyendra Dubey (A Tragic Hero)</h3>
-                <p><strong>The Man Who Fought Highway Corruption (2003):</strong> He exposed massive, unchecked corruption in a huge government highway project by sending a confidential letter to the Prime Minister's Office.</p>
-                <p>His name got out, and he was devastatingly murdered as a result.</p>
-                <p><strong>His Legacy:</strong> His death was the main reason India created the WBP Act in 2014, desperately trying to give better protection to those who speak up.</p>
-
-                <h3>Case Study 2: Shanmugam Manjunath (The Oil Integrity)</h3>
-                <p><strong>The Officer Who Tackled Fuel Fraud (2005):</strong> This Indian Oil Corporation officer single-handedly exposed a huge scam involving adulterated petrol and diesel, actually sealing the corrupt pumps himself.</p>
-                <p>He was later shot and killed. This case shows how dangerous it gets when corruption mixes with organized crime.</p>
-                <p><strong>His Legacy:</strong> He remains a powerful symbol of standing for integrity against a massive, deeply rooted system of fraud.</p>
-
-                <h3>Conclusion</h3>
-                <p>Whistleblowing represents one of the most challenging moral decisions an individual can face. It requires balancing loyalty to one's employer with duty to the public, often at great personal risk. The tragic cases of Satyendra Dubey and Shanmugam Manjunath demonstrate both the critical importance of whistleblowing and the desperate need for stronger protections.</p>
-                <p>While India has made progress with the WBP Act 2014 and the Companies Act 2013, effective implementation remains crucial. Organizations must create genuine cultures of transparency where employees feel safe reporting wrongdoing internally before it escalates to external whistleblowing.</p>
-                <p>Ultimately, whistleblowing is about courage, integrity, and the belief that truth and justice must prevail—even when the personal cost is immense.</p>
-
-                <div class="sources">
-                    <h3>Key Sources Used</h3>
-                    <a href="https://www.india.gov.in" target="_blank">The Whistleblowers Protection Act, 2014 (Government of India)</a>
-                    <a href="https://www.mca.gov.in" target="_blank">The Companies Act, 2013 (Vigil Mechanism)</a>
-                    <a href="https://cvc.gov.in/" target="_blank">Central Vigilance Commission (CVC)</a>
-                    <p style="color: #aaa; margin-top: 15px;">Public records and news reports on the Dubey and Manjunath cases, and general reading on Ethical Governance.</p>
-                </div>
-            </div>
+        <div class="research-card">
+          <h3>Artificial Intelligence in Healthcare</h3>
+          <p>Research on AI's role in the healthcare industry and future possibilities.</p>
+          <span class="status processing">⟳ Processing</span>
         </div>
-    </div>
 
-    <!-- ===============================
-         PAGE: ADD YOUR OWN (UPLOAD)
-    ==================================-->
-    <div id="add-own" class="page">
-        <div class="container">
-            <button class="back-btn" onclick="showPage('home')">← Back to Home</button>
-            <div class="upload-section">
-                <h2>Submit Your Research Paper</h2>
-                <p style="color: #aaa; margin-bottom: 30px;">Share your research with the community. Fill out the form below to submit your paper.</p>
-
-                <!-- Simple step guide -->
-                <div style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 15px; margin: 20px 0; border: 1px solid rgba(255, 255, 255, 0.1);">
-                    <h3 style="color: #64c8ff; margin-bottom: 15px;">📝 How to Submit:</h3>
-                    <ol style="text-align: left; color: #aaa; line-height: 2;">
-                        <li>Click the button below to choose a file</li>
-                        <li>We accept PDF, PPT, and PPTX formats</li>
-                        <li>Upload will save to Firebase and appear on the Research Papers page</li>
-                    </ol>
-                </div>
-
-                <!-- Visible action button that triggers the hidden file input -->
-                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">📄 Choose File</button>
-
-                <!-- Click/Drag area (click to open file picker) -->
-                <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-                    <input type="file" id="fileInput" accept=".pdf,.ppt,.pptx" onchange="uploadPaper(event)"/>
-                    <p id="uploadStatus">Click to select your research paper (PDF, PPT, or PPTX)</p>
-                </div>
-
-                <p style="color: #999; margin-top: 10px; font-size: 0.9rem;">Your submission will be uploaded to Firebase Storage and listed automatically.</p>
-            </div>
+        <div class="research-card">
+          <h3>Sustainable Energy Solutions</h3>
+          <p>Study on renewable energy sources and sustainable development.</p>
+          <span class="status processing">⟳ Processing</span>
         </div>
-    </div>
 
-    <!-- ===============================
-         PAGE: LINKS
-    ==================================-->
-    <div id="links" class="page">
-        <div class="container">
-            <button class="back-btn" onclick="showPage('home')">← Back to Home</button>
-            <div class="links-list">
-                <h2>Research Papers & Sources</h2>
-
-                <div class="link-item">
-                    <!-- Clicking the title opens the internal paper page -->
-                    <h3 onclick="showPaper('whistleblower')">Whistleblowing in Corporate Governance →</h3>
-                    <div style="margin-top: 15px;">
-                        <a href="https://www.sec.gov/whistleblower" target="_blank" style="display: inline-block; margin-right: 15px; color: #64c8ff;">SEC Whistleblower Program</a>
-                        <a href="https://www.transparency.org/en/topics/whistleblowing" target="_blank" style="display: inline-block; margin-right: 15px; color: #64c8ff;">Transparency International</a>
-                        <a href="https://www.oecd.org/corruption/ethics/whistleblower-protection.htm" target="_blank" style="display: inline-block; color: #64c8ff;">OECD Protection</a>
-                    </div>
-                </div>
-
-                <!-- Placeholder items for upcoming topics -->
-                <div class="link-item" style="opacity: 0.6;">
-                    <h3>Artificial Intelligence in Healthcare (Processing)</h3>
-                    <p style="color: #aaa; margin-top: 10px;">Sources will be available once paper is published</p>
-                </div>
-                <div class="link-item" style="opacity: 0.6;">
-                    <h3>Sustainable Energy Solutions (Processing)</h3>
-                    <p style="color: #aaa; margin-top: 10px;">Sources will be available once paper is published</p>
-                </div>
-                <div class="link-item" style="opacity: 0.6;">
-                    <h3>Blockchain Technology & Finance (Processing)</h3>
-                    <p style="color: #aaa; margin-top: 10px;">Sources will be available once paper is published</p>
-                </div>
-                <div class="link-item" style="opacity: 0.6;">
-                    <h3>Climate Change & Agriculture (Processing)</h3>
-                    <p style="color: #aaa; margin-top: 10px;">Sources will be available once paper is published</p>
-                </div>
-            </div>
+        <div class="research-card">
+          <h3>Blockchain Technology & Finance</h3>
+          <p>Impact of blockchain on the financial sector and future applications.</p>
+          <span class="status processing">⟳ Processing</span>
         </div>
+
+        <div class="research-card">
+          <h3>Climate Change & Agriculture</h3>
+          <p>Effects of climate change on agriculture and adaptation strategies.</p>
+          <span class="status processing">⟳ Processing</span>
+        </div>
+      </div>
+
+      <!-- Contact card -->
+      <div class="contact scroll-reveal">
+        <img src="NIK.jpg" alt="Nikhil Patel">
+        <div class="contact-info">
+          <h2>Nikhil Patel</h2>
+          <p><strong>Student</strong></p>
+          <p>Maharaja Agrasen Institute of Technology (MAIT)</p>
+          <p>Passionate about research and innovation. Through this platform, I aim to share my research work and motivate others to contribute to the world of knowledge and discovery.</p>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <!-- =========================================================
-         FIREBASE (ESM via CDN): App + Firestore + Storage
-         - Handles uploads to Storage and records to Firestore
-    ==========================================================-->
-    <script type="module">
-        /* Import Firebase modules (version 11) directly from Google's CDN */
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-        import {
-            getFirestore, collection, addDoc, serverTimestamp,
-            getDocs, query, orderBy
-        } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
-        import {
-            getStorage, ref, uploadBytesResumable, getDownloadURL
-        } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-storage.js";
+  <!-- RESEARCH LIST PAGE -->
+  <div id="research-list" class="page">
+    <div class="container">
+      <button class="back-btn" onclick="showPage('home')">← Back to Home</button>
+      <div class="paper-content">
+        <h2>Published Research Papers</h2>
 
-        /* Your Firebase project configuration */
-        const firebaseConfig = {
-            apiKey: "AIzaSyCmS-lFqBLjG2RWz12owEZtdpQ1lpSQ5B0",
-            authDomain: "research-7b6f1.firebaseapp.com",
-            projectId: "research-7b6f1",
-            storageBucket: "research-7b6f1.appspot.com",
-            messagingSenderId: "894993899623",
-            appId: "1:894993899623:web:59e211700e521b42b6f4c2"
-        };
+        <div class="research-grid">
+          <div class="research-card" onclick="showPaper('whistleblower')">
+            <h3>Whistleblowing in Corporate Governance</h3>
+            <span class="status completed">✓ Read Paper</span>
+          </div>
+        </div>
 
-        /* Initialize Firebase services (app, db, storage) */
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const storage = getStorage(app);
-        console.log('✅ Firebase connected successfully!');
+        <h3 style="margin-top:30px;">All Uploaded Papers</h3>
+        <table class="paper-table" id="papersTable">
+          <thead>
+            <tr>
+              <th>File Name</th>
+              <th>Type</th>
+              <th>Uploaded</th>
+            </tr>
+          </thead>
+          <tbody id="papersTableBody">
+            <tr><td colspan="3" style="color:#aaa;">No uploads yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-        /* Utility: Format Firestore Timestamp or epoch to local string */
-        function formatDate(ts) {
-            if (!ts) return '-';
-            try {
-                const d = ts.toDate ? ts.toDate() : new Date(ts);
-                return d.toLocaleString();
-            } catch {
-                return '-';
-            }
-        }
+  <!-- WHISTLEBLOWER PAPER PAGE -->
+  <div id="whistleblower-paper" class="page">
+    <div class="container">
+      <button class="back-btn" onclick="showPage('home')">← Back to Home</button>
+      <div class="paper-content">
+        <!-- Placeholder PDF button (unchanged behavior) -->
+        <a href="#" class="pdf-btn" onclick="alert('PDF download feature coming soon!'); return false;">📄 Download PDF</a>
 
-        /* =========================================================
-           PUBLIC: uploadPaper(event)
-           ---------------------------
-           - Triggered when user picks a file
-           - Streams upload (shows %), then saves metadata to Firestore
-        ==========================================================*/
-        window.uploadPaper = async (event) => {
-            const file = event.target.files && event.target.files[0];
-            const statusEl = document.getElementById('uploadStatus');
+        <!-- NEW: Generate PPTX button (AI flow, popup-safe) -->
+        <button class="upload-btn" style="margin-left: 10px;"
+          onclick="generatePPTX('Whistleblowing in Corporate Governance')">
+          🟣 Generate PPTX
+        </button>
 
-            /* Guard: No file chosen */
-            if (!file) {
-                if (statusEl) statusEl.textContent = 'No file selected.';
-                return;
-            }
-            if (statusEl) statusEl.textContent = `Uploading ${file.name}...`;
+        <h2>Whistleblowing: The Moral, Legal, and Human Challenge</h2>
+        <p style="font-style: italic; color: #aaa;">A Guide to Speaking Truth to Power (and the Risks Involved)</p>
 
-            try {
-                /* Create a unique path in Storage (timestamp + filename) */
-                const storageRef = ref(storage, `research_papers/${Date.now()}_${file.name}`);
+        <h3>Simply Put...</h3>
+        <p>Whistleblowing is when an insider (usually an employee) steps up to expose serious wrongdoing—like fraud, illegal activity, or major mismanagement—to the public or the right authorities.</p>
+        <p><strong>The Core Goal:</strong> It's all about making sure organizations are held accountable, corruption is exposed, and companies run ethically.</p>
+        <p><strong>In India:</strong> The law covers both the Government sector (via the WBP Act, 2014) and the Corporate world (via the Companies Act, 2013).</p>
 
-                /* Upload with resumable API (progress + reliability) */
-                const uploadTask = uploadBytesResumable(storageRef, file);
+        <h3>What Exactly is Whistleblowing?</h3>
+        <h3>Element 1: It Must Serve the Public Good</h3>
+        <p><strong>Saving People from Harm:</strong> Our top moral duty is to protect the public, customers, and the environment from real, predictable, and serious harm.</p>
+        <p><strong>Putting the Truth Out There:</strong> We have an obligation to reveal corruption and major ethical failures to ensure everyone is accountable and transparent.</p>
 
-                /* Progress callback: update status text */
-                uploadTask.on('state_changed', (snapshot) => {
-                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    if (statusEl) statusEl.textContent = `Uploading... ${progress.toFixed(0)}%`;
-                });
+        <h3>Element 2: The Loyalty Tug-of-War</h3>
+        <p><strong>Loyalty to Your Boss:</strong> We owe fidelity to our employer—the team, confidentiality, and the mission. This is our job.</p>
+        <p><strong>Loyalty to the Public:</strong> But sometimes, the duty to the public and society's safety must come first when the company is doing something wrong.</p>
 
-                /* Wait for completion (wrap in a Promise to await) */
-                await new Promise((resolve, reject) => {
-                    uploadTask.on('state_changed', null, reject, resolve);
-                });
+        <h3>Element 3: It Takes Real Moral Courage</h3>
+        <p style="font-style: italic; background: rgba(100, 200, 255, 0.1); padding: 20px; border-left: 4px solid #64c8ff; border-radius: 10px;">"It's about sticking to your personal values and principles, even when it means facing huge professional and personal risks." — The Human Element</p>
 
-                /* Get the public download URL */
-                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+        <h3>The Deepest Conflict at the Heart of It</h3>
+        <p>At its core, whistleblowing is a clash between two huge things: Your loyalty to the place you work vs. Your moral duty to public safety and truth.</p>
 
-                /* Save metadata to Firestore (for the table view) */
-                await addDoc(collection(db, 'research_papers'), {
-                    title: file.name,
-                    url: downloadURL,
-                    size: file.size,
-                    type: file.type || (file.name.split('.').pop() || '').toLowerCase(),
-                    uploadedAt: serverTimestamp()
-                });
+        <h3>Legal Corner: WBP Act, 2014 (For Government Employees)</h3>
+        <p><strong>Who it Covers:</strong> Mostly deals with exposing corruption or power abuse by Public Servants.</p>
+        <p><strong>Where to File:</strong> You have to report to a specific, authorized body, like the Central Vigilance Commission (CVC).</p>
+        <p><strong>Identity Required:</strong> You can't report anonymously. The law requires you to tell the CVC who you are.</p>
+        <p><strong>The Problem with Protection:</strong> The CVC is supposed to keep your name secret, but the very real fear of leaks is what stops most people.</p>
 
-                if (statusEl) statusEl.textContent = '✅ Uploaded successfully! It will appear in the list shortly.';
-            } catch (err) {
-                console.error(err);
-                if (statusEl) statusEl.textContent = '❌ Upload failed: ' + err.message;
-            }
-        };
+        <h3>Legal Corner: Companies Act, 2013 (For the Corporate World)</h3>
+        <p><strong>Who Needs It:</strong> It's required for all listed companies (and some others).</p>
+        <p><strong>What's Required:</strong> Companies must set up a formal, clear "Vigil Mechanism"—basically, a whistleblower policy.</p>
+        <p><strong>Direct Access:</strong> This mechanism needs to give staff direct, easy access to the Chairperson of the Audit Committee for serious reports.</p>
+        <p><strong>The Goal:</strong> It's designed to help prevent fraud and, critically, give safeguards against being victimized or fired for speaking up.</p>
 
-        /* =========================================================
-           PUBLIC: fetchPapers()
-           ---------------------
-           - Reads latest uploads from Firestore and renders the table
-        ==========================================================*/
-        window.fetchPapers = async () => {
-            const tbody = document.getElementById('papersTableBody');
-            if (!tbody) return;
+        <h3>The Motive: Why Do People Blow the Whistle?</h3>
+        <p><strong>The Pure Ethical Drive:</strong> They're driven by deep values—to stop harm and stand for justice, no matter what the cost is (True Intent).</p>
+        <p><strong>The Less Pure Motives:</strong> This can be complicated by personal anger, wanting revenge, or the lure of a big financial reward (Not always Bad, but Complex).</p>
 
-            /* Show a loading row while we fetch */
-            tbody.innerHTML = `<tr><td colspan="3" style="color:#aaa;">Loading...</td></tr>`;
+        <h3>The Ultimate Test: Is it Justified?</h3>
+        <p><strong>How We Weigh It Up:</strong> The action must come from a genuine, higher need to protect the public, especially after trying to fix the issue inside the company first (or if it's too dangerous).</p>
+        <p>It's the ultimate ethical showdown: Justice, Safety, and Truth versus Your Loyalty, Your Job, and Your Colleagues.</p>
 
-            try {
-                /* Query the collection ordered by upload time (latest first) */
-                const q = query(collection(db, 'research_papers'), orderBy('uploadedAt', 'desc'));
-                const snap = await getDocs(q);
+        <h3>How We Report It: The Reporting Channels</h3>
+        <p><strong>The Internal Path:</strong> You report it inside your organization (e.g., to the Audit Committee or the company hotline). This lets the company fix its own problems.</p>
+        <p><strong>Going Outside:</strong> You report it outside to a regulator (like the CVC, or the police) or the media. This is for when internal channels are useless or the threat is huge.</p>
 
-                if (snap.empty) {
-                    tbody.innerHTML = `<tr><td colspan="3" style="color:#aaa;">No uploads yet.</td></tr>`;
-                    return;
-                }
+        <h3>What We Report: The Subject Matter</h3>
+        <p><strong>Money & Fraud Issues:</strong> Things like lying about the books, insider trading, tax evasion, or executives misusing company money.</p>
+        <p><strong>Health & Safety Threats:</strong> Exposing things like pollution, products that aren't safe, or work environments that put employees or the public in danger.</p>
 
-                /* Build table rows from doc data */
-                const rows = [];
-                snap.forEach(doc => {
-                    const d = doc.data();
-                    const name = d.title || '(untitled)';
-                    const type = (d.type || '-').toString().toUpperCase().replace('APPLICATION/', '');
-                    const when = formatDate(d.uploadedAt);
-                    const url = d.url || '#';
+        <h3>The Responsible Way to Blow the Whistle</h3>
+        <p><strong>Start Inside:</strong> Always try to use the company's formal channels first (the Audit Committee, the hotline, etc.).</p>
+        <p><strong>Give Them a Chance:</strong> Give management a fair amount of time to look into it and fix the problem—as long as it's safe for you.</p>
+        <p><strong>Get Your Facts Straight:</strong> Collect solid, provable evidence that confirms the wrongdoing (but don't break any laws getting it!).</p>
+        <p><strong>Go Outside Last:</strong> Only go to the CVC, the police, or the media if the internal team fails, or if the danger is immediate and life-threatening.</p>
 
-                    rows.push(`
-                        <tr>
-                            <td><a href="${url}" target="_blank" rel="noopener">${name}</a></td>
-                            <td>${type}</td>
-                            <td>${when}</td>
-                        </tr>
-                    `);
-                });
-                tbody.innerHTML = rows.join('');
-            } catch (e) {
-                console.error(e);
-                tbody.innerHTML = `<tr><td colspan="3" style="color:#f99;">Failed to load papers: ${e.message}</td></tr>`;
-            }
-        };
-    </script>
+        <h3>The Character Traits That Define the Act</h3>
+        <p><strong>Integrity:</strong> Sticking to your own moral compass and putting the truth ahead of your own personal safety.</p>
+        <p><strong>Responsibility:</strong> Accepting that it's your duty to call out and fix a serious wrong.</p>
+        <p><strong>Courage:</strong> The gut-wrenching willingness to face negative fallout at work and in your life.</p>
 
-    <!-- =========================================================
-         APP LOGIC (UI interactions, animations, search flow)
-    ==========================================================-->
-    <script>
-        /* ---------------------------------
-           Create a bunch of floating particles
-           - purely visual background effect
-        ----------------------------------*/
-        function createParticles() {
-            const particleCount = 50;
-            for (let i = 0; i < particleCount; i++) {
-                const p = document.createElement('div');
-                p.className = 'particle';
-                p.style.left = Math.random() * 100 + '%';              // random x
-                p.style.animationDuration = (Math.random() * 10 + 5) + 's';
-                p.style.animationDelay = Math.random() * 5 + 's';
-                p.style.opacity = Math.random() * 0.5 + 0.2;
-                document.body.appendChild(p);
-            }
-        }
-        createParticles();
+        <h3>How Companies Can Stop External Whistleblowing</h3>
+        <p><strong>Build a Safe Space:</strong> Create a culture where staff trust they won't be fired or punished (non-victimisation) for speaking up.</p>
+        <p><strong>Make the Hotline Work:</strong> Set up and promote a clear, easy-to-use Vigil Mechanism that reports directly to the Audit Committee.</p>
+        <p><strong>Talk Early & Often:</strong> Encourage staff to flag small concerns quickly, before they turn into massive legal messes.</p>
+        <p><strong>Investigate FAST:</strong> Every single internal complaint must be looked into immediately, completely, and openly.</p>
 
-        /* ---------------------------------
-           Search handler
-           - Shows your modal for 3s
-           - Opens Gamma.ai in a popup-safe way
-             (opens blank tab immediately, then navigates)
-        ----------------------------------*/
-        function searchTopic() {
-            const query = document.getElementById('searchInput').value.trim();
+        <h3>Case Study 1: Satyendra Dubey (A Tragic Hero)</h3>
+        <p><strong>The Man Who Fought Highway Corruption (2003):</strong> He exposed massive, unchecked corruption in a huge government highway project by sending a confidential letter to the Prime Minister's Office.</p>
+        <p>His name got out, and he was devastatingly murdered as a result.</p>
+        <p><strong>His Legacy:</strong> His death was the main reason India created the WBP Act in 2014, desperately trying to give better protection to those who speak up.</p>
 
-            // Guard: empty input
-            if (!query) {
-                alert('Please enter a research topic!');
-                return;
-            }
+        <h3>Case Study 2: Shanmugam Manjunath (The Oil Integrity)</h3>
+        <p><strong>The Officer Who Tackled Fuel Fraud (2005):</strong> This Indian Oil Corporation officer single-handedly exposed a huge scam involving adulterated petrol and diesel, actually sealing the corrupt pumps himself.</p>
+        <p>He was later shot and killed. This case shows how dangerous it gets when corruption mixes with organized crime.</p>
+        <p><strong>His Legacy:</strong> He remains a powerful symbol of standing for integrity against a massive, deeply rooted system of fraud.</p>
 
-            // Build Gamma link (working endpoint)
-            const encodedQuery = encodeURIComponent(`Create a detailed research presentation about ${query}`);
-            const url = `https://gamma.app/create?text=${encodedQuery}`;
+        <h3>Conclusion</h3>
+        <p>Whistleblowing represents one of the most challenging moral decisions an individual can face. It requires balancing loyalty to one's employer with duty to the public, often at great personal risk. The tragic cases of Satyendra Dubey and Shanmugam Manjunath demonstrate both the critical importance of whistleblowing and the desperate need for stronger protections.</p>
+        <p>While India has made progress with the WBP Act 2014 and the Companies Act 2013, effective implementation remains crucial. Organizations must create genuine cultures of transparency where employees feel safe reporting wrongdoing internally before it escalates to external whistleblowing.</p>
+        <p>Ultimately, whistleblowing is about courage, integrity, and the belief that truth and justice must prevail—even when the personal cost is immense.</p>
 
-            // OPEN A TAB IMMEDIATELY on user click to avoid popup blockers
-            const popup = window.open('about:blank', '_blank');
+        <div class="sources">
+          <h3>Key Sources Used</h3>
+          <a href="https://www.india.gov.in" target="_blank">The Whistleblowers Protection Act, 2014 (Government of India)</a>
+          <a href="https://www.mca.gov.in" target="_blank">The Companies Act, 2013 (Vigil Mechanism)</a>
+          <a href="https://cvc.gov.in/" target="_blank">Central Vigilance Commission (CVC)</a>
+          <p style="color: #aaa; margin-top: 15px;">Public records and news reports on the Dubey and Manjunath cases, and general reading on Ethical Governance.</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
-            // Show a nice modal for 3 seconds (visual feedback)
-            const modal = document.createElement('div');
-            modal.style.cssText = `
-                position: fixed; inset: 0;
-                background: rgba(0, 0, 0, 0.9);
-                display: flex; justify-content: center; align-items: center;
-                z-index: 10000;
-            `;
-            modal.innerHTML = `
-                <div style="background: linear-gradient(135deg, #1a1f3a, #2a2f4a); padding: 50px; border-radius: 20px; max-width: 500px; width: 90%; border: 1px solid rgba(100, 200, 255, 0.3); text-align: center;">
-                    <div style="font-size: 3rem; margin-bottom: 20px;">🎨</div>
-                    <h2 style="color: #64c8ff; margin-bottom: 20px;">Generating Your Presentation...</h2>
-                    <p style="color: #aaa; margin-bottom: 30px;">Topic: "<strong style="color: white;">${query}</strong>"</p>
+  <!-- ADD YOUR OWN (UPLOAD) PAGE -->
+  <div id="add-own" class="page">
+    <div class="container">
+      <button class="back-btn" onclick="showPage('home')">← Back to Home</button>
+      <div class="upload-section">
+        <h2>Submit Your Research Paper</h2>
+        <p style="color: #aaa; margin-bottom: 30px;">Share your research with the community. Fill out the form below to submit your paper.</p>
 
-                    <div style="width: 100%; height: 4px; background: rgba(100, 200, 255, 0.2); border-radius: 2px; overflow: hidden; margin-bottom: 30px;">
-                        <div style="width: 0%; height: 100%; background: linear-gradient(90deg, #64c8ff, #a78bfa); animation: loadBar 2s forwards;"></div>
-                    </div>
+        <!-- Simple steps box -->
+        <div style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 15px; margin: 20px 0; border: 1px solid rgba(255, 255, 255, 0.1);">
+          <h3 style="color: #64c8ff; margin-bottom: 15px;">📝 How to Submit:</h3>
+          <ol style="text-align: left; color: #aaa; line-height: 2;">
+            <li>Click the button below to choose a file</li>
+            <li>We accept PDF, PPT, and PPTX formats</li>
+            <li>Upload will save to Firebase and appear on the Research Papers page</li>
+          </ol>
+        </div>
 
-                    <p style="color: #999; font-size: 0.9rem;">Opening Gamma.ai in 3 seconds...</p>
-                    <p style="color: #666; font-size: 0.85rem; margin-top: 10px;">You'll need to sign in to Gamma to complete the generation</p>
-                </div>
-            `;
-            document.body.appendChild(modal);
+        <!-- Visible button to trigger hidden file input -->
+        <button class="upload-btn" onclick="document.getElementById('fileInput').click()">📄 Choose File</button>
 
-            // Keyframes for the progress bar (injected once)
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes loadBar {
-                    0% { width: 0%; }
-                    100% { width: 100%; }
-                }
-            `;
-            document.head.appendChild(style);
+        <!-- Click area for file input -->
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+          <input type="file" id="fileInput" accept=".pdf,.ppt,.pptx" onchange="uploadPaper(event)">
+          <p id="uploadStatus">Click to select your research paper (PDF, PPT, or PPTX)</p>
+        </div>
 
-            // After 3s, navigate the already-opened tab and remove modal
-            setTimeout(() => {
-                if (popup) popup.location.href = url;
-                modal.remove();
-            }, 3000);
-        }
+        <!-- NEW: Progress bar UI -->
+        <div class="progress" id="uploadProgress"><div class="progress-bar" id="uploadProgressBar"></div></div>
+        <div class="progress-meta" id="uploadProgressMeta">0% • 0 KB of 0 KB</div>
 
-        /* ---------------------------------
-           Menu toggle logic (hamburger <-> drawer)
-        ----------------------------------*/
-        function toggleMenu() {
-            const menuBtn = document.querySelector('.menu-btn');
-            const menuPanel = document.querySelector('.menu-panel');
-            menuBtn.classList.toggle('active');
-            menuPanel.classList.toggle('active');
-        }
+        <p style="color: #999; margin-top: 10px; font-size: 0.9rem;">Your submission will be uploaded to Firebase Storage and listed automatically.</p>
+      </div>
+    </div>
+  </div>
 
-        /* ---------------------------------
-           Page router (SPA): show only 1 page at a time
-        ----------------------------------*/
-        function showPage(pageId) {
-            // Hide all pages, show the requested one
-            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
+  <!-- LINKS PAGE -->
+  <div id="links" class="page">
+    <div class="container">
+      <button class="back-btn" onclick="showPage('home')">← Back to Home</button>
+      <div class="links-list">
+        <h2>Research Papers & Sources</h2>
 
-            // Close drawer if open (for cleanliness on nav)
-            if (document.querySelector('.menu-panel').classList.contains('active')) {
-                toggleMenu();
-            }
+        <div class="link-item">
+          <h3 onclick="showPaper('whistleblower')">Whistleblowing in Corporate Governance →</h3>
+          <div style="margin-top: 15px;">
+            <a href="https://www.sec.gov/whistleblower" target="_blank" style="display: inline-block; margin-right: 15px; color: #64c8ff;">SEC Whistleblower Program</a>
+            <a href="https://www.transparency.org/en/topics/whistleblowing" target="_blank" style="display: inline-block; margin-right: 15px; color: #64c8ff;">Transparency International</a>
+            <a href="https://www.oecd.org/corruption/ethics/whistleblower-protection.htm" target="_blank" style="display: inline-block; color: #64c8ff;">OECD Protection</a>
+          </div>
+        </div>
 
-            // Jump to top of the page for better UX
-            window.scrollTo(0, 0);
+        <div class="link-item" style="opacity: 0.6;">
+          <h3>Artificial Intelligence in Healthcare (Processing)</h3>
+          <p style="color: #aaa; margin-top: 10px;">Sources will be available once paper is published</p>
+        </div>
 
-            // Re-initialize scroll animations on new content
-            setTimeout(initScrollAnimations, 100);
+        <div class="link-item" style="opacity: 0.6;">
+          <h3>Sustainable Energy Solutions (Processing)</h3>
+          <p style="color: #aaa; margin-top: 10px;">Sources will be available once paper is published</p>
+        </div>
 
-            // If we land on "research-list", refresh Firestore table
-            if (pageId === 'research-list' && window.fetchPapers) {
-                window.fetchPapers();
-            }
-        }
+        <div class="link-item" style="opacity: 0.6;">
+          <h3>Blockchain Technology & Finance (Processing)</h3>
+          <p style="color: #aaa; margin-top: 10px;">Sources will be available once paper is published</p>
+        </div>
 
-        /* Shortcut dispatcher from the drawer menu */
-        function showMenu(menuId) {
-            if (menuId === 'research-list') showPage('research-list');
-            else if (menuId === 'add-own') showPage('add-own');
-            else if (menuId === 'links') showPage('links');
-        }
+        <div class="link-item" style="opacity: 0.6;">
+          <h3>Climate Change & Agriculture (Processing)</h3>
+          <p style="color: #aaa; margin-top: 10px;">Sources will be available once paper is published</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        /* Open a specific internal paper page by id (e.g., 'whistleblower') */
-        function showPaper(paperId) {
-            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-            document.getElementById(paperId + '-paper').classList.add('active');
+  <!-- =========================================================
+       FIREBASE: App + Firestore + Storage (ESM via CDN)
+       - Adds: onSnapshot for real-time updates
+       ========================================================-->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+    import {
+      getFirestore, collection, addDoc, serverTimestamp,
+      query, orderBy, onSnapshot    /* ⬅ NEW for realtime */
+    } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+    import {
+      getStorage, ref, uploadBytesResumable, getDownloadURL
+    } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-storage.js";
 
-            if (document.querySelector('.menu-panel').classList.contains('active')) {
-                toggleMenu();
-            }
-            window.scrollTo(0, 0);
-        }
+    /* Your Firebase project details (unchanged) */
+    const firebaseConfig = {
+      apiKey: "AIzaSyCmS-lFqBLjG2RWz12owEZtdpQ1lpSQ5B0",
+      authDomain: "research-7b6f1.firebaseapp.com",
+      projectId: "research-7b6f1",
+      storageBucket: "research-7b6f1.appspot.com",
+      messagingSenderId: "894993899623",
+      appId: "1:894993899623:web:59e211700e521b42b6f4c2"
+    };
 
-        /* ---------------------------------
-           Scroll reveal: fade-up elements when they enter viewport
-        ----------------------------------*/
-        function initScrollAnimations() {
-            const reveals = document.querySelectorAll('.scroll-reveal');
+    /* Initialize Firebase services */
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+    console.log('✅ Firebase connected successfully!');
 
-            const revealOnScroll = () => {
-                reveals.forEach(el => {
-                    const elementTop = el.getBoundingClientRect().top;
-                    const elementVisible = 150; // threshold
-                    if (elementTop < window.innerHeight - elementVisible) {
-                        el.classList.add('active');
-                    }
-                });
-            };
+    /* Helpers: format dates and bytes (for progress) */
+    function formatDate(ts) {
+      if (!ts) return '-';
+      try {
+        const d = ts.toDate ? ts.toDate() : new Date(ts);
+        return d.toLocaleString();
+      } catch { return '-'; }
+    }
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 B';
+      if (!bytes) return '-';
+      const units = ['B','KB','MB','GB','TB'];
+      let i = 0, num = bytes;
+      while (num >= 1024 && i < units.length - 1) { num /= 1024; i++; }
+      return `${num.toFixed(num < 10 && i > 0 ? 1 : 0)} ${units[i]}`;
+    }
 
-            window.addEventListener('scroll', revealOnScroll);
-            revealOnScroll(); // run once on load
-        }
-        initScrollAnimations();
+    /* ==============================================
+       PUBLIC: uploadPaper(event)
+       - Shows a progress bar, uploads to Storage,
+         then writes metadata to Firestore
+       ==============================================*/
+    window.uploadPaper = async (event) => {
+      const file = event.target.files && event.target.files[0];
+      const statusEl = document.getElementById('uploadStatus');
+      const bar = document.getElementById('uploadProgressBar');
+      const wrap = document.getElementById('uploadProgress');
+      const meta = document.getElementById('uploadProgressMeta');
 
-        /* ---------------------------------
-           UX nicety: clicking outside drawer closes it
-        ----------------------------------*/
-        document.addEventListener('click', function(event) {
-            const menuPanel = document.querySelector('.menu-panel');
-            const menuBtn = document.querySelector('.menu-btn');
-            const clickedOutside = !menuPanel.contains(event.target) && !menuBtn.contains(event.target);
-            if (clickedOutside && menuPanel.classList.contains('active')) {
-                menuPanel.classList.remove('active');
-                menuBtn.classList.remove('active');
-            }
+      if (!file) { if (statusEl) statusEl.textContent = 'No file selected.'; return; }
+
+      // Show progress UI
+      if (wrap) wrap.style.display = 'block';
+      if (meta) meta.style.display = 'block';
+      if (bar)  bar.style.width = '0%';
+      if (statusEl) statusEl.textContent = `Uploading ${file.name}...`;
+
+      try {
+        const storageRef = ref(storage, `research_papers/${Date.now()}_${file.name}`);
+        const uploadTask = uploadBytesResumable(storageRef, file);
+
+        // Live progress feedback
+        uploadTask.on('state_changed', (snapshot) => {
+          const { bytesTransferred, totalBytes } = snapshot;
+          const progress = (bytesTransferred / totalBytes) * 100;
+          if (bar)  bar.style.width = `${progress.toFixed(0)}%`;
+          if (meta) meta.textContent = `${progress.toFixed(0)}% • ${formatBytes(bytesTransferred)} of ${formatBytes(totalBytes)}`;
+          if (statusEl) statusEl.textContent = `Uploading... ${progress.toFixed(0)}%`;
         });
 
-        /* ---------------------------------
-           Parallax hover: tilt cards based on mouse position
-        ----------------------------------*/
-        document.addEventListener('mousemove', (e) => {
-            const cards = document.querySelectorAll('.research-card');
-            cards.forEach(card => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-
-                // Only tilt when the mouse is actually over the card
-                if (x > 0 && x < rect.width && y > 0 && y < rect.height) {
-                    const xRotation = ((y - rect.height / 2) / rect.height) * -10;
-                    const yRotation = ((x - rect.width / 2) / rect.width) * 10;
-                    card.style.transform = `perspective(1000px) rotateX(${xRotation}deg) rotateY(${yRotation}deg) translateY(-15px) scale(1.03)`;
-                }
-            });
+        // Await completion
+        await new Promise((resolve, reject) => {
+          uploadTask.on('state_changed', null, reject, resolve);
         });
 
-        // Reset tilt when mouse leaves a card
-        document.querySelectorAll('.research-card').forEach(card => {
-            card.addEventListener('mouseleave', function() { this.style.transform = ''; });
+        // Public download URL
+        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+
+        // Save metadata for listing
+        await addDoc(collection(db, 'research_papers'), {
+          title: file.name,
+          url: downloadURL,
+          size: file.size,
+          type: file.type || (file.name.split('.').pop() || '').toLowerCase(),
+          uploadedAt: serverTimestamp()
         });
 
-        // Dev-time sanity check
-        console.assert(typeof toggleMenu === 'function', 'toggleMenu should be defined');
-    </script>
+        if (statusEl) statusEl.textContent = '✅ Uploaded successfully! It will appear in the list shortly.';
+      } catch (err) {
+        console.error(err);
+        if (statusEl) statusEl.textContent = '❌ Upload failed: ' + err.message;
+      } finally {
+        // Hide progress UI after a short pause
+        setTimeout(() => {
+          if (wrap) wrap.style.display = 'none';
+          if (meta) meta.style.display = 'none';
+          if (bar)  bar.style.width = '0%';
+        }, 800);
+      }
+    };
+
+    /* ==============================================
+       REAL-TIME TABLE: listen to changes in Firestore
+       - startRealtimePapers() attaches one live listener
+       - stopRealtimePapers() detaches it when leaving page
+       ==============================================*/
+    let papersUnsub = null;
+
+    window.startRealtimePapers = () => {
+      const tbody = document.getElementById('papersTableBody');
+      if (!tbody) return;
+
+      // Prevent multiple listeners
+      if (papersUnsub) return;
+
+      tbody.innerHTML = `<tr><td colspan="3" style="color:#aaa;">Loading...</td></tr>`;
+
+      const qRef = query(collection(db, 'research_papers'), orderBy('uploadedAt', 'desc'));
+      papersUnsub = onSnapshot(qRef, (snap) => {
+        if (snap.empty) {
+          tbody.innerHTML = `<tr><td colspan="3" style="color:#aaa;">No uploads yet.</td></tr>`;
+          return;
+        }
+        const rows = [];
+        snap.forEach(doc => {
+          const d = doc.data();
+          const name = d.title || '(untitled)';
+          const type = (d.type || '-').toString().toUpperCase().replace('APPLICATION/', '');
+          const when = formatDate(d.uploadedAt);
+          const url = d.url || '#';
+          rows.push(`<tr>
+            <td><a href="${url}" target="_blank" rel="noopener">${name}</a></td>
+            <td>${type}</td>
+            <td>${when}</td>
+          </tr>`);
+        });
+        tbody.innerHTML = rows.join('');
+      }, (e) => {
+        console.error(e);
+        tbody.innerHTML = `<tr><td colspan="3" style="color:#f99;">Failed to load papers: ${e.message}</td></tr>`;
+      });
+    };
+
+    window.stopRealtimePapers = () => {
+      if (papersUnsub) {
+        papersUnsub();
+        papersUnsub = null;
+      }
+    };
+  </script>
+
+  <!-- =========================================================
+       APP LOGIC (non-module): UI, navigation, search, PPTX
+       ========================================================-->
+  <script>
+    /* Create decorative floating particles on load */
+    function createParticles() {
+      const particleCount = 50;
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDuration = (Math.random() * 10 + 5) + 's';
+        particle.style.animationDelay = Math.random() * 5 + 's';
+        particle.style.opacity = Math.random() * 0.5 + 0.2;
+        document.body.appendChild(particle);
+      }
+    }
+    createParticles();
+
+    /* Search bar: popup-safe + working Gamma endpoint */
+    function searchTopic() {
+      const query = document.getElementById('searchInput').value.trim();
+      if (!query) { alert('Please enter a research topic!'); return; }
+
+      const encodedQuery = encodeURIComponent(`Create a detailed research presentation about ${query}`);
+      const url = `https://gamma.app/create?text=${encodedQuery}`;
+
+      // Open a tab immediately (prevents popup block)
+      const popup = window.open('about:blank', '_blank');
+
+      // Show your stylish loading modal for 3s
+      const modal = document.createElement('div');
+      modal.style.cssText = `
+        position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9);
+        display: flex; justify-content: center; align-items: center; z-index: 10000;
+      `;
+      modal.innerHTML = `
+        <div style="background: linear-gradient(135deg, #1a1f3a, #2a2f4a); padding: 50px; border-radius: 20px; max-width: 500px; width: 90%; border: 1px solid rgba(100, 200, 255, 0.3); text-align: center;">
+          <div style="font-size: 3rem; margin-bottom: 20px;">🎨</div>
+          <h2 style="color: #64c8ff; margin-bottom: 20px;">Generating Your Presentation...</h2>
+          <p style="color: #aaa; margin-bottom: 30px;">Topic: "<strong style="color: white;">${query}</strong>"</p>
+          <div style="width: 100%; height: 4px; background: rgba(100, 200, 255, 0.2); border-radius: 2px; overflow: hidden; margin-bottom: 30px;">
+            <div style="width: 0%; height: 100%; background: linear-gradient(90deg, #64c8ff, #a78bfa); animation: loadBar 2s forwards;"></div>
+          </div>
+          <p style="color: #999; font-size: 0.9rem;">Opening Gamma.ai in 3 seconds...</p>
+          <p style="color: #666; font-size: 0.85rem; margin-top: 10px;">You'll need to sign in to Gamma to complete the generation</p>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      const style = document.createElement('style');
+      style.textContent = `@keyframes loadBar { 0% { width: 0%; } 100% { width: 100%; } }`;
+      document.head.appendChild(style);
+
+      setTimeout(() => {
+        if (popup) popup.location.href = url;
+        modal.remove();
+      }, 3000);
+    }
+
+    /* PPTX generator: same popup-safe pattern, with a richer prompt */
+    function generatePPTX(topic) {
+      if (!topic) topic = 'Research Presentation';
+
+      const encoded = encodeURIComponent(
+`Create a structured, 10-12 slide PowerPoint (.pptx) with:
+- Title & agenda
+- Background & definitions
+- Problem statement with context
+- Ethical & legal aspects (India focus allowed)
+- 2 case studies with data points
+- Pros/cons & risks
+- Clear recommendations
+- Conclusion
+- References slide
+
+Topic: ${topic}`
+      );
+
+      const popup = window.open('about:blank', '_blank');
+
+      const modal = document.createElement('div');
+      modal.style.cssText = `
+        position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+        display: flex; justify-content: center; align-items: center; z-index: 10000;
+      `;
+      modal.innerHTML = `
+        <div style="background: linear-gradient(135deg,#1a1f3a,#2a2f4a); padding: 40px; border-radius: 16px; border: 1px solid rgba(100,200,255,0.3); max-width: 520px; text-align: center;">
+          <div style="font-size: 2.6rem; margin-bottom: 16px;">📑</div>
+          <h2 style="color:#64c8ff; margin-bottom: 12px;">Generating PPTX…</h2>
+          <p style="color:#aaa; margin-bottom: 20px;">Topic: <strong style="color:#fff;">${topic}</strong></p>
+          <div style="width:100%; height:4px; background: rgba(100,200,255,0.2); border-radius:2px; overflow:hidden; margin-bottom:18px;">
+            <div style="width:0%; height:100%; background: linear-gradient(90deg,#64c8ff,#a78bfa); animation: loadBar 2s forwards;"></div>
+          </div>
+          <p style="color:#999; font-size:0.9rem;">We’ll open the AI presentation builder in a new tab.</p>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      const style = document.createElement('style');
+      style.textContent = `@keyframes loadBar { 0%{width:0%} 100%{width:100%} }`;
+      document.head.appendChild(style);
+
+      setTimeout(() => {
+        const url = `https://gamma.app/create?text=${encoded}`;
+        if (popup) popup.location.href = url;
+        modal.remove();
+      }, 2200);
+    }
+
+    /* Menu drawer toggle */
+    function toggleMenu() {
+      const menuBtn = document.querySelector('.menu-btn');
+      const menuPanel = document.querySelector('.menu-panel');
+      menuBtn.classList.toggle('active');
+      menuPanel.classList.toggle('active');
+    }
+
+    /* SPA-style navigation: show exactly one page at a time
+       + start/stop realtime table on research page */
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+
+      if (document.querySelector('.menu-panel').classList.contains('active')) {
+        toggleMenu();
+      }
+      window.scrollTo(0, 0);
+      setTimeout(initScrollAnimations, 100);
+
+      if (pageId === 'research-list') {
+        if (window.startRealtimePapers) window.startRealtimePapers();
+      } else {
+        if (window.stopRealtimePapers) window.stopRealtimePapers();
+      }
+    }
+
+    /* Right drawer shortcuts */
+    function showMenu(menuId) {
+      if (menuId === 'research-list') showPage('research-list');
+      else if (menuId === 'add-own') showPage('add-own');
+      else if (menuId === 'links') showPage('links');
+    }
+
+    /* Open an internal paper by id (e.g., 'whistleblower') */
+    function showPaper(paperId) {
+      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+      document.getElementById(paperId + '-paper').classList.add('active');
+
+      if (document.querySelector('.menu-panel').classList.contains('active')) {
+        toggleMenu();
+      }
+      window.scrollTo(0, 0);
+    }
+
+    /* Scroll reveal: fade-up when in view */
+    function initScrollAnimations() {
+      const reveals = document.querySelectorAll('.scroll-reveal');
+      const revealOnScroll = () => {
+        reveals.forEach(el => {
+          const top = el.getBoundingClientRect().top;
+          if (top < window.innerHeight - 150) el.classList.add('active');
+        });
+      };
+      window.addEventListener('scroll', revealOnScroll);
+      revealOnScroll();
+    }
+    initScrollAnimations();
+
+    /* Clicking outside the drawer closes it */
+    document.addEventListener('click', function(event) {
+      const menuPanel = document.querySelector('.menu-panel');
+      const menuBtn = document.querySelector('.menu-btn');
+      if (!menuPanel.contains(event.target) && !menuBtn.contains(event.target)) {
+        if (menuPanel.classList.contains('active')) {
+          menuPanel.classList.remove('active');
+          menuBtn.classList.remove('active');
+        }
+      }
+    });
+
+    /* Parallax tilt on research cards */
+    document.addEventListener('mousemove', (e) => {
+      const cards = document.querySelectorAll('.research-card');
+      cards.forEach(card => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        if (x > 0 && x < rect.width && y > 0 && y < rect.height) {
+          const xRot = ((y - rect.height / 2) / rect.height) * -10;
+          const yRot = ((x - rect.width / 2) / rect.width) * 10;
+          card.style.transform = `perspective(1000px) rotateX(${xRot}deg) rotateY(${yRot}deg) translateY(-15px) scale(1.03)`;
+        }
+      });
+    });
+    document.querySelectorAll('.research-card').forEach(card => {
+      card.addEventListener('mouseleave', function() { this.style.transform = ''; });
+    });
+
+    // Dev sanity check
+    console.assert(typeof toggleMenu === 'function', 'toggleMenu should be defined');
+  </script>
 </body>
 </html>
